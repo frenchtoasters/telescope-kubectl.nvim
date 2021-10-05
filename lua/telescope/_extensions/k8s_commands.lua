@@ -75,6 +75,7 @@ function M.k8s_edits(opts)
 		command = 'kubectl',
 		args = {'get', 'all', '--all-namespaces', '--no-headers=true'},
 		env = {
+			PATH = vim.env.PATH,
 			['KUBECONFIG'] = kubeconfig
 		},
 		on_stdout = function(_, data)
@@ -95,7 +96,7 @@ function M.k8s_edits(opts)
 				local choice = action_state.get_selected_entry(pbfr)
 				local choice_ns = string.match(choice.value, "^[^ ]+")
 				local choice_obj = string.match(choice.value, "[ ]+[^ ]+"):gsub("%s", "")
-				io.popen('kubectl edit --kubeconfig=' .. kubeconfig .. ' ' .. choice_obj .. ' -n ' .. choice_ns)
+				vim.cmd('! tmux neww kubectl edit --kubeconfig=' .. kubeconfig .. ' ' .. choice_obj .. ' -n ' .. choice_ns)
 			end)
 			return true
 		end,
@@ -142,6 +143,7 @@ function M.k8s_logs(opts)
 		command = 'kubectl',
 		args = {'get', 'pods', '--all-namespaces', '--no-headers=true'},
 		env = {
+			PATH = vim.env.PATH,
 			['KUBECONFIG'] = kubeconfig
 		},
 		on_stdout = function(_, data)
