@@ -16,3 +16,22 @@ Plug 'frenchtoasters/telescope-kubectl.nvim'
 ```
 require('telescope').load_extension('k8s_commands')
 ```
+
+### Configuraiton
+
+```
+require'telescope'.seutp {
+	...
+	extensions = {
+		k8s_commands = {
+			kubeconfig = "/kube/configs", -- defaults to $HOME/.kube/config
+			k8s_cmd = "k" -- defaults to kubectl
+		}
+	},
+}
+```
+
+```
+nnoremap <leader>k <cmd>lua require('telescope').load_extension('k8s_commands').k8s_edits()<cr>
+nnoremap <leader>kl <cmd>lua require('telescope').load_extension('k8s_commands').k8s_logs()<cr>
+```
