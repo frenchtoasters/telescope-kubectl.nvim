@@ -17,7 +17,7 @@ local conf = require('telescope.config').values
 
 local Job = require'plenary.job'
 local M = {}
-local kubeconfig = "/home/toast/.kube/test-cofig'"
+local kubeconfig = ""
 local k8s_cmd = ""
 
 M.base_directory=""
@@ -43,7 +43,6 @@ M.k8s_preview = defaulter(function(opts)
 	}
 end, {})
 
--- Call with M.k8s_edit{kubeconfig="~/.kube/config"}
 function M.k8s_edits(opts)
 	local k8s_commands = {
 		kubectl = {
@@ -76,7 +75,8 @@ function M.k8s_edits(opts)
 		args = {'get', 'all', '--all-namespaces', '--no-headers=true'},
 		env = {
 			PATH = vim.env.PATH,
-			['KUBECONFIG'] = kubeconfig
+			['KUBECONFIG'] = kubeconfig,
+			HOME = vim.env.HOME
 		},
 		on_stdout = function(_, data)
 			table.insert(results, data)
@@ -88,7 +88,8 @@ function M.k8s_edits(opts)
 		args = {'get', 'secrets', '--all-namespaces', '--no-headers=true'},
 		env = {
 			PATH = vim.env.PATH,
-			['KUBECONFIG'] = kubeconfig
+			['KUBECONFIG'] = kubeconfig,
+			HOME = vim.env.HOME
 		},
 		on_stdout = function(_, data)
 			table.insert(results, data)
@@ -100,7 +101,8 @@ function M.k8s_edits(opts)
 		args = {'get', 'configmaps', '--all-namespaces', '--no-headers=true'},
 		env = {
 			PATH = vim.env.PATH,
-			['KUBECONFIG'] = kubeconfig
+			['KUBECONFIG'] = kubeconfig,
+			HOME = vim.env.HOME
 		},
 		on_stdout = function(_, data)
 			table.insert(results, data)
@@ -166,7 +168,8 @@ function M.k8s_logs(opts)
 		args = {'get', 'pods', '--all-namespaces', '--no-headers=true'},
 		env = {
 			PATH = vim.env.PATH,
-			['KUBECONFIG'] = kubeconfig
+			['KUBECONFIG'] = kubeconfig,
+			HOME = vim.env.HOME
 		},
 		on_stdout = function(_, data)
 			table.insert(results, data)
@@ -194,7 +197,7 @@ end
 
 return require('telescope').register_extension {
 	setup = function(ext_config)
-		kubeconfig = ext_config.kubeconfig or "/home/toast/.kube/test-cofig"
+		kubeconfig = ext_config.kubeconfig or os.getenv("HOME") .. "/.kube/config"
 		k8s_cmd = ext_config.k8s_cmd or "kubectl"
 	end,
 	exports = {
