@@ -111,8 +111,6 @@ function M.k8s_edits(opts)
 	picker:find()
 end
 
-
-
 function M.k8s_logs(opts)
 	local k8s_commands = {
 		kubectl = {
@@ -151,6 +149,30 @@ function M.k8s_logs(opts)
 		end,
 	}):sync()
 
+	Job:new({
+		command = 'kubectl',
+		args = {'get', 'secrets', '--all-namespaces', '--no-headers=true'},
+		env = {
+			PATH = vim.env.PATH,
+			['KUBECONFIG'] = kubeconfig
+		},
+		on_stdout = function(_, data)
+			table.insert(results, data)
+		end,
+	}):sync()
+
+	Job:new({
+		command = 'kubectl',
+		args = {'get', 'configmaps', '--all-namespaces', '--no-headers=true'},
+		env = {
+			PATH = vim.env.PATH,
+			['KUBECONFIG'] = kubeconfig
+		},
+		on_stdout = function(_, data)
+			table.insert(results, data)
+		end,
+	}):sync()
+
 	local picker=pickers.new(opts, {
 		prompt_title = kubeconfig,
 		finder = finders.new_table({
@@ -169,7 +191,6 @@ function M.k8s_logs(opts)
 	popup_opts = picker:get_window_options(vim.o.columns, line_count)
 	picker:find()
 end
-
 
 return require('telescope').register_extension {
 	setup = function(ext_config)
