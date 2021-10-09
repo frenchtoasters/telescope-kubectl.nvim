@@ -83,6 +83,30 @@ function M.k8s_edits(opts)
 		end,
 	}):sync()
 
+	Job:new({
+		command = 'kubectl',
+		args = {'get', 'secrets', '--all-namespaces', '--no-headers=true'},
+		env = {
+			PATH = vim.env.PATH,
+			['KUBECONFIG'] = kubeconfig
+		},
+		on_stdout = function(_, data)
+			table.insert(results, data)
+		end,
+	}):sync()
+
+	Job:new({
+		command = 'kubectl',
+		args = {'get', 'configmaps', '--all-namespaces', '--no-headers=true'},
+		env = {
+			PATH = vim.env.PATH,
+			['KUBECONFIG'] = kubeconfig
+		},
+		on_stdout = function(_, data)
+			table.insert(results, data)
+		end,
+	}):sync()
+
 	opts = opts or {}
 	local picker=pickers.new(opts, {
 		prompt_title = kubeconfig,
@@ -140,30 +164,6 @@ function M.k8s_logs(opts)
 	Job:new({
 		command = 'kubectl',
 		args = {'get', 'pods', '--all-namespaces', '--no-headers=true'},
-		env = {
-			PATH = vim.env.PATH,
-			['KUBECONFIG'] = kubeconfig
-		},
-		on_stdout = function(_, data)
-			table.insert(results, data)
-		end,
-	}):sync()
-
-	Job:new({
-		command = 'kubectl',
-		args = {'get', 'secrets', '--all-namespaces', '--no-headers=true'},
-		env = {
-			PATH = vim.env.PATH,
-			['KUBECONFIG'] = kubeconfig
-		},
-		on_stdout = function(_, data)
-			table.insert(results, data)
-		end,
-	}):sync()
-
-	Job:new({
-		command = 'kubectl',
-		args = {'get', 'configmaps', '--all-namespaces', '--no-headers=true'},
 		env = {
 			PATH = vim.env.PATH,
 			['KUBECONFIG'] = kubeconfig
