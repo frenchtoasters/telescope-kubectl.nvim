@@ -72,7 +72,7 @@ function M.k8s_edits(opts)
 	local results = {}
 	Job:new({
 		command = 'kubectl',
-		args = {'get', 'all', '--all-namespaces', '--no-headers=true'},
+		args = {'get', 'all', '--show-kind','--all-namespaces', '--no-headers=true'},
 		env = {
 			PATH = vim.env.PATH,
 			['KUBECONFIG'] = kubeconfig,
@@ -85,7 +85,7 @@ function M.k8s_edits(opts)
 
 	Job:new({
 		command = 'kubectl',
-		args = {'get', 'secrets', '--all-namespaces', '--no-headers=true'},
+		args = {'get', 'secrets', '--show-kind','--all-namespaces', '--no-headers=true'},
 		env = {
 			PATH = vim.env.PATH,
 			['KUBECONFIG'] = kubeconfig,
@@ -98,7 +98,7 @@ function M.k8s_edits(opts)
 
 	Job:new({
 		command = 'kubectl',
-		args = {'get', 'configmaps', '--all-namespaces', '--no-headers=true'},
+		args = {'get', 'configmaps', '--show-kind','--all-namespaces', '--no-headers=true'},
 		env = {
 			PATH = vim.env.PATH,
 			['KUBECONFIG'] = kubeconfig,
