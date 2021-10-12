@@ -195,6 +195,70 @@ function M.k8s_logs(opts)
 	picker:find()
 end
 
+function M.k8sexec(opts)
+	local k8s_commands = {
+		kubectl = {
+			'kubectl',
+		},
+	}
+
+	if not vim.fn.executable(k8s_cmd) then
+		error("You don't have "..k8s_cmd.."! Install it first.")
+		return
+		end
+
+	if not k8s_commands[k8s_cmd] then
+		error(k8s_cmd.." is not supported!")
+		return
+	end
+
+	local sourced_file = require('plenary.debug_utils').sourced_filepath()
+	M.base_directory = vim.fn.fnamemodify(sourced_file, ":h:h:h:h")
+	opts = opts or {}
+	local popup_opts={}
+	opts.get_preview_window=function ()
+		return popup_opts.preview
+	end
+
+	local results = {}
+	Job:new({
+		command = 'kubectl',
+		args = {'get', 'pods', '--show-kind','--all-namespaces', '--no-headers=true'},
+		env = {
+			PATH = vim.env.PATH,
+			['KUBECONFIG'] = kubeconfig
+		},
+		on_stdout = function(_, data)
+			table.insert(results, data)
+		end,
+	}):sync()
+
+	local picker=pickers.new(opts, {
+		prompt_title = kubeconfig,
+		finder = finders.new_table({
+			results = results,
+			opts = opts,
+		}),
+		sorter = conf.generic_sorter(opts),
+		attach_mappings = function(pbfr, map)
+			map("i", "<CR>", function()
+				local choice = action_state.get_selected_entry(pbfr)
+				local choice_ns = string.match(choice.value, "^[^ ]+")
+				local choice_obj = string.match(choice.value, "[ ]+[^ ]+"):gsub("%s", "")
+				vim.cmd('! tmux neww kubectl exec --kubeconfig=' .. kubeconfig .. ' --tty --stdin ' .. choice_obj .. ' -n ' .. choice_ns .. ' -- ' .. exec_cmd)
+			end)
+			return true
+		end,
+	})
+
+	local line_count = vim.o.lines - vim.o.cmdheight
+	if vim.o.laststatus ~= 0 then
+		line_count = line_count - 1
+	end
+	popup_opts = picker:get_window_options(vim.o.columns, line_count)
+	picker:find()
+end
+
 return require('telescope').register_extension {
 	setup = function(ext_config)
 		kubeconfig = ext_config.kubeconfig or os.getenv("HOME") .. "/.kube/config"
@@ -202,7 +266,8 @@ return require('telescope').register_extension {
 	end,
 	exports = {
 		k8s_logs = M.k8s_logs,
-		k8s_edits = M.k8s_edits
+		k8s_edits = M.k8s_edits,
+		k8s_exec = M.k8s_exec
 	},
 }
 
