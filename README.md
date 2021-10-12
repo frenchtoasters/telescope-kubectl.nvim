@@ -20,7 +20,7 @@ require('telescope').load_extension('k8s_commands')
 ### Configuraiton
 
 ```
-require'telescope'.seutp {
+require'telescope'.setup {
 	...
 	extensions = {
 		k8s_commands = {
