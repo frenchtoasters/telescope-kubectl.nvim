@@ -34,4 +34,5 @@ require'telescope'.seutp {
 ```
 nnoremap <leader>k <cmd>lua require('telescope').load_extension('k8s_commands').k8s_edits()<cr>
 nnoremap <leader>kl <cmd>lua require('telescope').load_extension('k8s_commands').k8s_logs()<cr>
+nnoremap <leader>ke <cmd>lua require('telescope').load_extension('k8s_commands').k8s_exec()<cr>
 ```
