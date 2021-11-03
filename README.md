@@ -2,6 +2,11 @@
 
 Edit k8s objects, view pod logs, etc...
 
+## Requirements
+
+* tmux
+* >= neovim v0.5.1
+
 ## Install
 
 ```
