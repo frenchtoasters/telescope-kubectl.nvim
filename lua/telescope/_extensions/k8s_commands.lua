@@ -195,7 +195,7 @@ function M.k8s_logs(opts)
 	picker:find()
 end
 
-function M.k8sexec(opts)
+function M.k8s_exec(opts)
 	local k8s_commands = {
 		kubectl = {
 			'kubectl',
@@ -263,6 +263,7 @@ return require('telescope').register_extension {
 	setup = function(ext_config)
 		kubeconfig = ext_config.kubeconfig or os.getenv("HOME") .. "/.kube/config"
 		k8s_cmd = ext_config.k8s_cmd or "kubectl"
+		exec_cmd = ext_config.k8s_exec_cmd or "/bin/sh"
 	end,
 	exports = {
 		k8s_logs = M.k8s_logs,
