@@ -36,8 +36,57 @@ require'telescope'.setup {
 }
 ```
 
+### Default key mappings
+
 ```
-nnoremap <leader>k <cmd>lua require('telescope').load_extension('k8s_commands').k8s_edits()<cr>
-nnoremap <leader>kl <cmd>lua require('telescope').load_extension('k8s_commands').k8s_logs()<cr>
-nnoremap <leader>ke <cmd>lua require('telescope').load_extension('k8s_commands').k8s_exec()<cr>
+map("i", "<CR>", function()
+	local choice = action_state.get_selected_entry(pbfr)
+	local choice_ns = string.match(choice.value, "^[^ ]+")
+	local choice_obj = string.match(choice.value, "[ ]+[^ ]+"):gsub("%s", "")
+	vim.cmd('! tmux neww kubectl edit --kubeconfig=' .. kubeconfig .. ' ' .. choice_obj .. ' -n ' .. choice_ns)
+end)
+map("i", "<S-e>", function ()
+	local choice = action_state.get_selected_entry(pbfr)
+	local choice_ns = string.match(choice.value, "^[^ ]+")
+	local choice_obj = string.match(choice.value, "[ ]+[^ ]+"):gsub("%s", "")
+	vim.cmd('! tmux neww kubectl exec --kubeconfig=' .. kubeconfig .. ' --tty --stdin ' .. choice_obj .. ' -n ' .. choice_ns .. ' -- ' .. exec_cmd)
+	end)
+map("i", "<S-l>", function()
+	local choice = action_state.get_selected_entry(pbfr)
+	local ns = string.match(choice.value, "^[^ ]+")
+	local obj = string.match(choice.value, "[ ]+[^ ]+"):gsub("%s", "")
+	local contents = {}
+	Job:new({
+		command = 'kubectl',
+		args = {'logs','-n', ns, obj},
+		env = {
+			PATH = vim.env.PATH,
+			['KUBECONFIG'] = kubeconfig,
+			HOME = vim.env.HOME
+		},
+		on_stdout = function(_, data)
+			table.insert(contents, data)
+		end
+	}):sync()
+	local logger = pickers.new(opts, {
+		prompt_title = "Logs for pod: " .. obj,
+		finder = finders.new_table({
+			results = contents,
+			opts = opts,
+		}),
+		sorter = conf.generic_sorter(opts),
+	})
+	local line_count = vim.o.lines - vim.o.cmdheight
+	if vim.o.laststatus ~= 0 then
+		line_count = line_count - 1
+	end
+	popup_opts = logger:get_window_options(vim.o.columns, line_count)
+	logger:find()
+end)
+```
+
+# Example keymap
+
+```
+Map("n","<leader>k", ":lua require('telescope').load_extension('k8s_commands').k8s(require('telescope.themes').get_ivy())<CR>", {noremap=true})
 ```
